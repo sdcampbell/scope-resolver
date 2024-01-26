@@ -7,9 +7,14 @@ Usage:
 
 ```
 Usage of scope-resolver:
-  (no arguments)         Read from stdin
-  <file_path>            Read from the specified file
-  -h or --help           Print this help message
+  -p int
+    	Port to bother the specified DNS resolver on (default 53)
+  -protocol string
+    	Protocol for DNS lookups (tcp or udp) (default "udp")
+  -r string
+    	IP of DNS resolver for lookups
+  -t int
+    	numbers of threads (default 32)
 
 Examples:
   cat ips.txt | scope-resolver
