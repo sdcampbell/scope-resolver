@@ -1,5 +1,6 @@
-# scope-resolver
-Expands a pentest scope by taking an input list which includes IP addresses and parses DNS and TLS SAN hostnames and merges the results with the original scope list. 
+# Purpose
+
+Scope-resolver expands a pentest scope by taking an input list which includes IP addresses and parses DNS and TLS SAN hostnames and merges the results with the original scope list. 
 
 Why? Because you need a list of vhosts, hostnames, and subdomains to properly enumerate web applications running behind a load balancer/proxy on an IP address. 
 
@@ -7,9 +8,11 @@ If you only scan and check DNS records, you'll miss applications load balanced o
 
 If the discovered hostname/vhost was found through TLS certificate inspection instead of DNS, you can now add the discovered hostname to your `/etc/hosts` file to access the web application for further testing. You can also force Nessus to scan by hostname tied to a specific IP address by specifying the target like so: `server1.example.com[192.168.1.1]`
 
-Install: `go install github.com/sdcampbell/scope-resolver@latest`
+# Installation
 
-Usage:
+`go install github.com/sdcampbell/scope-resolver@latest`
+
+# Usage
 
 ```
 Usage of scope-resolver:
