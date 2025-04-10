@@ -5,6 +5,8 @@ Why? Because you need a list of vhosts, hostnames, and subdomains to properly en
 
 If you only scan and check DNS records, you'll miss applications load balanced on an IP address that don't have DNS records for the application. You may find web applications intended to be protected behind a CDN WAF where their firewall isn't limiting access to CDN IP address ranges and get lucky! I've also found old, forgotten web applications that sat behind load balancers using this tool which the customer didn't realize was exposed to the Internet.
 
+If the discovered hostname/vhost was found through TLS certificate inspection instead of DNS, you can now add the discovered hostname to your `/etc/hosts` file to access the web application for further testing. You can also force Nessus to scan by hostname tied to a specific IP address by specifying the target like so: `server1.example.com[192.168.1.1]`
+
 Install: `go install github.com/sdcampbell/scope-resolver@latest`
 
 Usage:
