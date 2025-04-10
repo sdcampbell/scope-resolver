@@ -19,6 +19,8 @@ import (
 func sslChecks(ip string, resChan chan<- string, client *http.Client) {
 
 	url := ip
+	// Store the original input to use in the output
+	originalIP := ip
 
 	// make sure we use https as we're doing SSL checks
 	if strings.HasPrefix(ip, "http://") {
@@ -27,6 +29,7 @@ func sslChecks(ip string, resChan chan<- string, client *http.Client) {
 		url = "https://" + ip
 	}
 
+	// URL is now properly formatted with https:// prefix
 	req, reqErr := http.NewRequest("HEAD", url, nil)
 	if reqErr != nil {
 		return
@@ -40,9 +43,9 @@ func sslChecks(ip string, resChan chan<- string, client *http.Client) {
 	if resp.TLS != nil && len(resp.TLS.PeerCertificates) > 0 {
 		dnsNames := resp.TLS.PeerCertificates[0].DNSNames
 		for _, name := range dnsNames {
-			resChan <- "[SSL-SAN] " + ip + " " + string(name)
+			resChan <- "[SSL-SAN] " + originalIP + " " + string(name)
 		}
-		resChan <- "[SSL-CN] " + ip + " " + resp.TLS.PeerCertificates[0].Subject.CommonName
+		resChan <- "[SSL-CN] " + originalIP + " " + resp.TLS.PeerCertificates[0].Subject.CommonName
 	}
 }
 
@@ -63,10 +66,26 @@ func worker(jobChan <-chan string, resChan chan<- string, wg *sync.WaitGroup, tr
 	defer wg.Done()
 
 	for job := range jobChan {
+		// Run SSL checks on the job (with potential port)
 		sslChecks(job, resChan, client)
-		dnsChecks(job, resChan, resolver)
+		
+		// For DNS checks, we need to extract the IP without the port
+		dnsIP := job
+		// Remove protocol prefix if any
+		if strings.HasPrefix(dnsIP, "http://") {
+			dnsIP = strings.TrimPrefix(dnsIP, "http://")
+		} else if strings.HasPrefix(dnsIP, "https://") {
+			dnsIP = strings.TrimPrefix(dnsIP, "https://")
+		}
+		
+		// Extract IP without port
+		if host, _, err := net.SplitHostPort(dnsIP); err == nil {
+			dnsIP = host
+		}
+		
+		// Run DNS checks on the IP without port
+		dnsChecks(dnsIP, resChan, resolver)
 	}
-
 }
 func main() {
 	workers := flag.Int("t", 32, "numbers of threads")
